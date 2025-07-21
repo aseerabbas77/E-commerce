@@ -1,7 +1,14 @@
 import express from 'express';
 const app=express()
 import mongoose from 'mongoose';
+import bodyparser from 'express';
+import userRouter from './Routes/user.js'
+import Products from './Routes/product.js'
+import cartRouter from './Routes/cart.js'
+
 const port=5000;
+
+app.use(bodyparser.json())
 
 mongoose.connect("mongodb+srv://aseerabbas492:OXcufy7xm3gssJkX@cluster0.1qyji6n.mongodb.net/",{
     dbName:"mern-ecomerce"
@@ -10,6 +17,9 @@ mongoose.connect("mongodb+srv://aseerabbas492:OXcufy7xm3gssJkX@cluster0.1qyji6n.
 }).catch((err)=>{
     console.log(err)
 })
+app.use('/api/user',userRouter);
+app.use('/api/product',Products)
+app.use('/api/cart',cartRouter)
 
 app.listen(port,()=>{
     console.log(`server is running on the port ${port} `)
