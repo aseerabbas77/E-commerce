@@ -1,6 +1,7 @@
 import { Products } from "../Models/Product.js";
 import { User } from "../Models/User.js";
 import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 export const register=async (req,res)=>{
     const {name,email,password}=req.body;
     try{
@@ -18,23 +19,33 @@ export const register=async (req,res)=>{
     }
 };
 
-export const login=async(req,res)=>{
-    const {email,password}=req.body;
-    try{
-        let user=await User.findOne({email})
-        if(!user){
-            return res.json({message:"user invalid",success:false})
-        }
-        const validpass=await bcrypt.compare(password,user.password);
-        if(!validpass){
-            return res.json({message:"invalid credentials",success:false})
-        }
-     res.json({message:`welcome ${user.name}`,success:true,user})
+export const login = async (req, res) => {
+  const { email, password } = req.body;
 
-    }catch(err){
-          res.json({message:err.message})
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found", success: false });
     }
-}
+
+    const validpass = await bcrypt.compare(password, user.password);
+
+    if (!validpass) {
+      return res.status(401).json({ message: "Invalid credentials", success: false });
+    }
+
+    // ✅ Only here, after password is valid
+    const token = jwt.sign({ userId: user._id }, "@!jajkaf77()", {
+      expiresIn: '365d'
+    });
+
+    res.json({ message: `Welcome ${user.name}`, token, success: true, user });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message, success: false });
+  }
+};
 
 export const users=async (req,res)=>{
     try{
